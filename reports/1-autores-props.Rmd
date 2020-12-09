@@ -82,8 +82,6 @@ proposicoes %>%
 
 ## Autorias entre parlamentares
 
-<!-- TO DO: há 4 suplentes de senadores e 3 proposições que não recuperamos ainda.  -->
-
 ```{r}
 autorias = autores_leggo %>%
   select(-casa) %>% 
@@ -91,14 +89,6 @@ autorias = autores_leggo %>%
             by = c("id_autor_parlametria" = "id_entidade_parlametria")) %>% 
   mutate(nome_parlamentar = str_glue("{nome} - {partido}/{uf}"))
 ```
-
-```{r}
-# os que não pegamos:
-# autorias %>% 
-#   filter(is.na(nome)) %>% 
-#   select(id_autor_parlametria, n)
-```
-
 
 ### Nos PDLs
 
