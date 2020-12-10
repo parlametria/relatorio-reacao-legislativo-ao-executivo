@@ -43,7 +43,6 @@ resumo_autorias = read_autorias_res() %>%  select(-situacao,
                                                   -starts_with("id"))
 ```
 
-## Autorias entre parlamentares
 
 ```{r}
 resumo_autorias %>%
@@ -54,6 +53,7 @@ resumo_autorias %>%
 
 ```{r}
 detalhes_autorias %>% 
+  select(-id_entidade, -sigla_tipo) %>% 
   tbl_detalhes_autorias()
 ```
 
@@ -69,10 +69,11 @@ resumo_autorias %>%
        y = "", 
        title = "Governismo entre autores das PDLs", 
        subtitle = "Cada ponto é um(a) parlamentar",
-       size = "Autorias poderadas")
+       size = "Autorias poderadas") + 
+  theme(legend.position = "bottom")
 ```
 
-## Autoria nos partidos
+## Autoria dos partidos
 
 ```{r}
 autorias_partidos = 
@@ -81,7 +82,6 @@ autorias_partidos =
   distinct()
 ```
 
-### Nas PDLs
 
 ```{r fig.height=4}
 autorias_partidos %>%

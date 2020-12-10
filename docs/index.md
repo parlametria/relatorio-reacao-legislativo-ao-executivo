@@ -1,3 +1,4 @@
 # Análises e relatórios
 
-Listaremos aqui os relatórios em html que quisermos deixar públicos. 
+  * [Proposições acompanhadas e seu apoio](./1-proposicoes.html)
+  * [Quem autorou as proposições](./2-autores-props.html)
