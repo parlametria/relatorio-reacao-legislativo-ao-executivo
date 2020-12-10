@@ -72,12 +72,12 @@ tbl_detalhes_autorias = function(data) {
         ),
         uf = colDef(
           name = "UF",
-          minWidth = 50,
+          minWidth = 30,
           aggregate = "unique"
         ),
         casa = colDef(
           name = "Casa",
-          minWidth = 50,
+          minWidth = 40,
           aggregate = "unique"
         ),
         governismo = colDef(
