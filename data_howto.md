@@ -149,6 +149,6 @@ Os dados processados estarão em `data/bd` dentro do repositório do leggo-twitt
 
 Como os dados de tweets são grandes demais para o github. Recomenda-se subir num drive, para que o download seja feito conforme a necessidade.
 
-Os dados gerados para o conjunto de proposições deste repositório está disponível [aqui](https://drive.google.com/file/d/1ri6pJl0Oy0EjV4YyOePCi8p5kB5OMKPc/view?usp=sharing).
+Os dados gerados para o conjunto de proposições deste repositório está disponível [aqui](https://drive.google.com/file/d/1bh8w85Q93LDe8vxAn9JB6IqWlpMKPpEN/view?usp=sharing).
 
 Baixe o zip e extraia para a pasta `data/leggo_twitter` neste repositório.
