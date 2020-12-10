@@ -1,2 +1,3 @@
-# relatorio-reacao-legislativo-ao-executivo
-Repositório com scripts e dados necessários para a construção do relatório de reação do legislativo ao executivo em relação às proposições de meio ambiente.
+# Relatório: Reação do Legislativo aos atos do Executivo em Meio Ambiente e Clima
+
+Scripts, dados e visualizações da parte do relatório feita pelo Parlametria. 
