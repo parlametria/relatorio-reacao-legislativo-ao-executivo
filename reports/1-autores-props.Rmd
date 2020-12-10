@@ -6,68 +6,44 @@ output:
     css: styles.css
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, echo=FALSE}
 knitr::opts_chunk$set(
   echo = FALSE,
-  # message = FALSE,
+  message = FALSE,
   # fig.cap = '',
-  # warning = FALSE,
+  warning = FALSE,
   # fig.align = 'center',
   fig.width = 6,
   fig.height = 5
 )
+
+Sys.setenv(LANGUAGE="pt-br")
+Sys.setlocale("LC_TIME", "pt_BR")
+options(scipen = 999)
 ```
 
 ```{r warning=FALSE, message=FALSE}
 library(tidyverse)
-library(here)
 library(reactable)
-library(ggrepel)
 library(ggchicklet)
 library(hrbrthemes)
 theme_set(theme_ipsum_rc())
 
+source(here::here("code/read_ready.R"))
 source(here::here("reports/autorias.R"))
-options(scipen = 999)
 ```
 
 ```{r}
-proposicoes = read_csv(
-  here::here("data/leggo_data/proposicoes.csv"),
-  col_types = cols(
-    .default = col_character(),
-    data_apresentacao = col_datetime(format = "")
-  )
-)
-
-proposicoes = proposicoes %>%  # temos uma linha por casa da proposição
-  filter(!duplicated(id_leggo))
+proposicoes = read_proposicoes()
+detalhes_autorias = read_autorias_det()
+resumo_autorias = read_autorias_res() %>%  select(-situacao,
+                                                  -em_exercicio,
+                                                  -is_parlamentar,
+                                                  -sexo,
+                                                  -starts_with("id"))
 ```
 
-```{r}
-autores_leggo_raw = read_csv(
-  here::here("data/leggo_data/autores_leggo.csv"), 
-  col_types = cols(
-    .default = col_character()
-  )
-)
-
-autores_leggo = autores_leggo_raw %>% 
-  left_join(proposicoes, by = "id_leggo")
-```
-
-```{r}
-entidades = read_csv(
-  here::here("data/leggo_data/entidades.csv"),
-  col_types = cols(
-    .default = col_character(),
-    em_exercicio = col_double(),
-    is_parlamentar = col_double()
-  )
-) %>% 
-  select(-legislatura) %>% 
-  distinct()
-```
+## Proposições consideradas
 
 Estamos examinando `r NROW(proposicoes)` proposições dos seguintes tipos:
 
@@ -80,57 +56,55 @@ proposicoes %>%
   labs(x = "", y = "Proposições")
 ```
 
+
+```{r}
+proposicoes %>% 
+  mutate(mes = lubridate::floor_date(data_apresentacao, "months")) %>% 
+  count(mes) %>% 
+  ggplot(aes(x = mes, y = n)) + 
+  geom_chicklet(fill = "#ff8040") + 
+  scale_x_datetime(date_minor_breaks = "1 month", date_labels = "%b/%y") + 
+  labs(x = "Mês", 
+       y = "Proposições apresentadas", 
+       title = "Quando as proposições foram apresentadas")
+```
+
+
 ## Autorias entre parlamentares
 
 ```{r}
-autorias = autores_leggo %>%
-  select(-casa) %>% 
-  left_join(entidades,
-            by = c("id_autor_parlametria" = "id_entidade_parlametria")) %>% 
-  mutate(nome_parlamentar = str_glue("{nome} - {partido}/{uf}"))
-```
-
-### Nos PDLs
-
-```{r}
-autorias %>% 
-  filter(sigla_tipo == "PDL") %>% 
-  resume_autorias() %>% 
+resumo_autorias %>%
   tbl_autorias_resumida()
 ```
 
 #### Detalhes
 
 ```{r}
-autorias %>% 
-  filter(sigla_tipo == "PDL") %>% 
-  detalhes_autorias() %>% 
+detalhes_autorias %>% 
   tbl_detalhes_autorias()
 ```
 
-
-### Em todas as proposições
-
-```{r}
-autorias %>% 
-  resume_autorias() %>% 
-  tbl_autorias_resumida()
-```
-
-#### Detalhes
+### Perfil dos autores
 
 ```{r}
-autorias %>% 
-  detalhes_autorias() %>% 
-  tbl_detalhes_autorias()
+resumo_autorias %>% 
+  mutate(assinou = if_else(assinadas > 0, "Autores", "Não autores")) %>% 
+  ggplot(aes(x = governismo, y = assinou, size = autorias_ponderadas)) + 
+  facet_grid(casa ~ .) + 
+  geom_point(alpha = 0.5) + 
+  labs(x = "Governismo (neg. sign. oposição)", 
+       y = "", 
+       title = "Governismo entre autores das PDLs", 
+       subtitle = "Cada ponto é um(a) parlamentar",
+       size = "Autorias poderadas")
 ```
-
 
 ## Autoria nos partidos
 
 ```{r}
-autorias_partidos = partidos = autorias %>% 
-  select(sigla_tipo, numero, partido) %>% 
+autorias_partidos = 
+  detalhes_autorias %>% 
+  select(proposicao, partido) %>% 
   distinct()
 ```
 
@@ -138,7 +112,6 @@ autorias_partidos = partidos = autorias %>%
 
 ```{r fig.height=4}
 autorias_partidos %>%
-  filter(sigla_tipo == "PDL") %>%
   count(partido) %>%
   ggplot(aes(x = reorder(partido, n), y = n)) +
   geom_chicklet(fill = "#21a6a0") +
@@ -146,17 +119,4 @@ autorias_partidos %>%
   labs(title = "Participação dos partidos na autoria dos PDLs",
        subtitle = "Pelo menos um(a) parlamentar do partido é autor(a)",
        x = "", y = "PDLs autordas por parlamentar do partido")
-```
-
-```{r fig.height=6}
-autorias_partidos %>%
-  filter(!is.na(partido)) %>% 
-  mutate(PDL = sigla_tipo == "PDL") %>% 
-  count(partido, PDL) %>%
-  ggplot(aes(x = reorder(partido, n, sum), y = n, fill = PDL)) +
-  geom_chicklet() +
-  coord_flip() +
-  labs(title = "Autorias dos partidos em todas as reações",
-       subtitle = "Pelo menos um(a) parlamentar do partido é autor(a)",
-       x = "", y = "Proposições autoradas por parlamentares do partido")
 ```

@@ -5,33 +5,10 @@ cria_paleta <- function(domain, from = "#ffe4cc", to = "#ff9500") {
   }
 }
 
-detalhes_autorias = function(data) {
-  data %>%
-    filter(!is.na(nome)) %>%
-    mutate(proposicao = str_glue("{sigla_tipo} {numero}")) %>%
-    group_by(id_leggo, proposicao) %>%
-    mutate(autores = n()) %>%
-    ungroup() %>%
-    select(nome, partido, uf, casa, proposicao, autores) %>%
-    mutate(
-      assinadas = 1,
-      autorias_ponderadas = 1 / autores,
-      coautores = autores - 1
-    )
-}
-
-resume_autorias = function(data){
-  data %>% 
-    detalhes_autorias() %>% 
-    group_by(nome, partido, uf, casa) %>% 
-    summarise(assinadas = sum(assinadas), 
-              autorias_ponderadas = sum(autorias_ponderadas), 
-              .groups = "drop")
-}
-
 tbl_autorias_resumida = function(data) {
   escala_assinadas = cria_paleta(data$assinadas)
   escala_ponderadas = cria_paleta(data$autorias_ponderadas)
+  escala_governismo = cria_paleta(data %>% filter(!is.na(governismo)) %>% pull(governismo), to = "#ffffcc", from = "#41b6c4")
   
   data %>%
     reactable(
@@ -58,6 +35,18 @@ tbl_autorias_resumida = function(data) {
           format = colFormat(digits = 1),
           style = function(value) {
             list(background = escala_ponderadas(value))
+          }
+        ), 
+        governismo = colDef(
+          name = "Governismo (-10 a 10)", 
+          minWidth = 70, 
+          format = colFormat(digits = 1), 
+          style = function(value) {
+            if(is.na(value)){
+              list()
+            } else{
+              list(background = escala_governismo(value))
+            }
           }
         )
       )
@@ -90,6 +79,12 @@ tbl_detalhes_autorias = function(data) {
           name = "Casa",
           minWidth = 50,
           aggregate = "unique"
+        ),
+        governismo = colDef(
+          name = "Governismo", 
+          minWidth = 50,
+          aggregate = "mean", 
+          format = colFormat(digits = 1)
         ),
         proposicao = colDef(
           name = "Proposições",
