@@ -24,7 +24,7 @@ options(scipen = 999)
 
 ```{r warning=FALSE, message=FALSE}
 library(tidyverse)
-library(reactable)
+library(ggbeeswarm)
 library(ggchicklet)
 library(hrbrthemes)
 theme_set(theme_ipsum_rc())
@@ -69,4 +69,51 @@ proposicoes %>%
        title = "Quando as proposições foram apresentadas")
 ```
 
+## Números de autores
+
+```{r}
+participacao = detalhes_autorias %>%
+  group_by(proposicao) %>% 
+  summarise(autores = n(), 
+            partidos = n_distinct(partido))
+```
+
+```{r}
+participacao %>% 
+  ggplot(aes(x = reorder(proposicao, autores), y = autores)) + 
+  geom_hline(yintercept = 1, color = "#dddddd") + 
+  geom_chicklet(width = .5, fill = "#f7c74f") +
+  coord_flip() + 
+  labs(x = "", 
+       title = "Número de parlamentares autores",
+       subtitle = "Considerando todos que assinaram a proposição")
+```
+
+```{r}
+participacao %>% 
+  ggplot(aes(x = reorder(proposicao, partidos), y = partidos)) + 
+  geom_hline(yintercept = 1, color = "#dddddd") + 
+  geom_chicklet(width = .5, fill = "#f7c74f") +
+  coord_flip() + 
+  labs(x = "", 
+       title = "Número de partidos entre autores")
+```
+```{r}
+atividade_partido = detalhes_autorias %>% 
+  group_by(partido) %>% 
+  summarise(proposicoes = n_distinct(proposicao))
+  
+detalhes_autorias %>%
+  distinct(proposicao, partido) %>% 
+  left_join(participacao) %>% 
+  left_join(atividade_partido) %>% 
+  ggplot(aes(x = reorder(partido, -proposicoes), y = reorder(proposicao, partidos))) + 
+  geom_tile(fill =  "#f7c74f", color = "black") + 
+  labs(
+    title = "Colaborações entre partidos",
+    subtitle = "Células indicam se cada partido assinou cada prop.",
+    x = "",
+    y = ""
+  )
+```
 
