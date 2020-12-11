@@ -79,38 +79,41 @@ participacao = detalhes_autorias %>%
 ```
 
 ```{r}
-participacao %>% 
-  ggplot(aes(x = reorder(proposicao, autores), y = autores)) + 
-  geom_hline(yintercept = 1, color = "#dddddd") + 
-  geom_chicklet(width = .5, fill = "#f7c74f") +
-  coord_flip() + 
-  labs(x = "", 
+participacao %>%
+  ggplot(aes(label = proposicao, y = autores, x = "")) +
+  geom_quasirandom(color  = "#f7c74f") +
+  coord_flip() +
+  labs(x = "",
        title = "Número de parlamentares autores",
        subtitle = "Considerando todos que assinaram a proposição")
 ```
 
 ```{r}
 participacao %>% 
+  filter(partidos > 1) %>% 
   ggplot(aes(x = reorder(proposicao, partidos), y = partidos)) + 
   geom_hline(yintercept = 1, color = "#dddddd") + 
   geom_chicklet(width = .5, fill = "#f7c74f") +
   coord_flip() + 
   labs(x = "", 
-       title = "Número de partidos entre autores")
+       title = "Número de partidos entre autores", 
+       subtitle = "Apenas proposições com mais de um partido autor")
 ```
 ```{r}
 atividade_partido = detalhes_autorias %>% 
+  filter(!is.na(partido)) %>% 
   group_by(partido) %>% 
   summarise(proposicoes = n_distinct(proposicao))
   
 detalhes_autorias %>%
+  filter(proposicao %in% (filter(participacao, partidos >1) %>% pull(proposicao))) %>% 
   distinct(proposicao, partido) %>% 
   left_join(participacao) %>% 
   left_join(atividade_partido) %>% 
   ggplot(aes(x = reorder(partido, -proposicoes), y = reorder(proposicao, partidos))) + 
   geom_tile(fill =  "#f7c74f", color = "black") + 
   labs(
-    title = "Colaborações entre partidos",
+    title = "Colaborações entre partidos que coautoraram",
     subtitle = "Células indicam se cada partido assinou cada prop.",
     x = "",
     y = ""
