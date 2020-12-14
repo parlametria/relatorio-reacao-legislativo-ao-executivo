@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
   # fig.cap = '',
   warning = FALSE,
   # fig.align = 'center',
-  fig.width = 6,
+  fig.width = 8,
   fig.height = 5
 )
 
@@ -69,48 +69,100 @@ proposicoes %>%
        title = "Quando as proposições foram apresentadas")
 ```
 
+```{r}
+proposicoes %>% 
+  count(tema) %>% 
+  ggplot(aes(x = reorder(tema, n), y = n)) + 
+  geom_chicklet(fill = "#21a6a0") + 
+  coord_flip() + 
+  labs(x = "", y = "Proposições", title = "Por tema", subtitle = "Categorização para o relatório")
+```
+
+```{r}
+proposicoes %>% 
+  count(norma_atacada) %>% 
+  top_n(10, n) %>% 
+  mutate(norma_atacada = if_else(str_length(norma_atacada) <= 50, 
+                                 norma_atacada, 
+                                 paste0(str_sub(norma_atacada, end = 47), "..."))) %>% 
+  ggplot(aes(x = reorder(norma_atacada, n), y = n)) + 
+  geom_chicklet(fill = "#ff8040") + 
+  coord_flip() + 
+  labs(x = "", y = "Proposições", title = "Por Norma Atacada", subtitle = "Norma a ser suspendida")
+```
+
+
+```{r}
+proposicoes %>% 
+  filter(!is.na(situacao)) %>% 
+  count(situacao) %>% 
+  ggplot(aes(x = reorder(situacao, n), y = n)) + 
+  geom_chicklet(fill = "#21a6a0") + 
+  coord_flip() + 
+  labs(title = "Situação das proposições", 
+       subtitle = "em dez/2020",
+       x = "", y = "Proposições")
+```
+
 ## Números de autores
 
 ```{r}
 participacao = detalhes_autorias %>%
   group_by(proposicao) %>% 
+  filter(!is.na(partido)) %>% 
   summarise(autores = n(), 
             partidos = n_distinct(partido))
 ```
 
 ```{r}
-participacao %>% 
-  ggplot(aes(x = reorder(proposicao, autores), y = autores)) + 
-  geom_hline(yintercept = 1, color = "#dddddd") + 
-  geom_chicklet(width = .5, fill = "#f7c74f") +
-  coord_flip() + 
-  labs(x = "", 
+participacao %>%
+  ggplot(aes(label = proposicao, x = autores)) +
+  # geom_quasirandom(color  = "#f7c74f", alpha = .7) +
+  geom_histogram(fill = "#f7c74f", color = "black", binwidth = 1) +
+  geom_rug(size = .4, alpha = .5) + 
+  labs(x = "Autores",
+       y = "Quantidade de PDLs",
        title = "Número de parlamentares autores",
        subtitle = "Considerando todos que assinaram a proposição")
 ```
 
 ```{r}
 participacao %>% 
+  top_n(15, autores) %>% 
+  ggplot(aes(x = reorder(proposicao, autores), y = autores)) + 
+  geom_chicklet(width = .5, fill = "#f7c74f") +
+  coord_flip() + 
+  labs(x = "", 
+       title = "Proposições com mais autores")
+```
+
+
+```{r}
+participacao %>% 
+  filter(partidos > 1) %>% 
   ggplot(aes(x = reorder(proposicao, partidos), y = partidos)) + 
   geom_hline(yintercept = 1, color = "#dddddd") + 
   geom_chicklet(width = .5, fill = "#f7c74f") +
   coord_flip() + 
   labs(x = "", 
-       title = "Número de partidos entre autores")
+       title = "Número de partidos entre autores", 
+       subtitle = "Apenas proposições com mais de um partido autor")
 ```
 ```{r}
 atividade_partido = detalhes_autorias %>% 
+  filter(!is.na(partido)) %>% 
   group_by(partido) %>% 
   summarise(proposicoes = n_distinct(proposicao))
   
 detalhes_autorias %>%
+  filter(proposicao %in% (filter(participacao, partidos >1) %>% pull(proposicao))) %>% 
   distinct(proposicao, partido) %>% 
   left_join(participacao) %>% 
   left_join(atividade_partido) %>% 
   ggplot(aes(x = reorder(partido, -proposicoes), y = reorder(proposicao, partidos))) + 
   geom_tile(fill =  "#f7c74f", color = "black") + 
   labs(
-    title = "Colaborações entre partidos",
+    title = "Colaborações entre partidos que coautoraram",
     subtitle = "Células indicam se cada partido assinou cada prop.",
     x = "",
     y = ""

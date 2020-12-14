@@ -9,6 +9,7 @@ tbl_autorias_resumida = function(data) {
   escala_assinadas = cria_paleta(data$assinadas)
   escala_ponderadas = cria_paleta(data$autorias_ponderadas)
   escala_governismo = cria_paleta(data %>% filter(!is.na(governismo)) %>% pull(governismo), to = "#ffffcc", from = "#41b6c4")
+  escala_peso = cria_paleta(data %>% filter(!is.na(peso_politico)) %>% pull(peso_politico), from = "#edf8fb", to = "#8c96c6")
   
   data %>%
     reactable(
@@ -46,6 +47,18 @@ tbl_autorias_resumida = function(data) {
               list()
             } else{
               list(background = escala_governismo(value))
+            }
+          }
+        ), 
+        peso_politico = colDef(
+          name = "Peso político", 
+          minWidth = 70, 
+          format = colFormat(digits = 1), 
+          style = function(value) {
+            if(is.na(value)){
+              list()
+            } else{
+              list(background = escala_peso(value))
             }
           }
         )
