@@ -17,6 +17,8 @@ As colunas `id_camara` e `id_senado` precisam estar preenchidas com os identific
 
 Neste passo você deve gerar ou atualizar uma lista de proposições neste formato. Essa lista será usada em passos seguintes.
 
+Já existe uma lista processada com proposições de interesse para análise nesse repositório. Este csv está disponível em `data/raw/proposicoes_input.csv`. Ele é resultado da transformação contida no script `code/transform_input.R`. Esse csv será usado no passo 1.3.
+
 ## Passo 1.2
 
 Baixe os repositórios [leggo-geral](https://github.com/parlametria/leggo-geral) e do [leggoR](https://github.com/parlametria/leggor). 
@@ -29,7 +31,7 @@ O **leggo-geral** é responsável por orquestrar os diferentes módulos do proce
 
 ## Passo 1.3
 
-Baixe o CSV da planilha que foi gerada no passo 1 e salve em `inst/extdata/proposicoes_local.csv`
+Baixe o CSV `proposicoes_input.csv` descrito no passo 1.1 e salve em `inst/extdata/proposicoes_local.csv`
 
 Crie um arquivo CSV em `inst/extdata/interesses_local.csv` com o conteúdo
 
