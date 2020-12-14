@@ -81,13 +81,26 @@ participacao = detalhes_autorias %>%
 
 ```{r}
 participacao %>%
-  ggplot(aes(label = proposicao, y = autores, x = "")) +
-  geom_quasirandom(color  = "#f7c74f") +
-  coord_flip() +
-  labs(x = "",
+  ggplot(aes(label = proposicao, x = autores)) +
+  # geom_quasirandom(color  = "#f7c74f", alpha = .7) +
+  geom_histogram(fill = "#f7c74f", color = "black", binwidth = 1) +
+  geom_rug(size = .4, alpha = .5) + 
+  labs(x = "Autores",
+       y = "Quantidade de PDLs",
        title = "Número de parlamentares autores",
        subtitle = "Considerando todos que assinaram a proposição")
 ```
+
+```{r}
+participacao %>% 
+  top_n(15, autores) %>% 
+  ggplot(aes(x = reorder(proposicao, autores), y = autores)) + 
+  geom_chicklet(width = .5, fill = "#f7c74f") +
+  coord_flip() + 
+  labs(x = "", 
+       title = "Proposições com mais autores")
+```
+
 
 ```{r}
 participacao %>% 
