@@ -1,0 +1,119 @@
+---
+title: "Autorias nas proposições"
+output:
+  html_document:
+    theme: paper
+    css: styles.css
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  # fig.cap = '',
+  warning = FALSE,
+  # fig.align = 'center',
+  fig.width = 6,
+  fig.height = 5
+)
+
+Sys.setenv(LANGUAGE="pt-br")
+Sys.setlocale("LC_TIME", "pt_BR")
+options(scipen = 999)
+```
+
+```{r warning=FALSE, message=FALSE}
+library(tidyverse)
+library(ggbeeswarm)
+library(ggchicklet)
+library(hrbrthemes)
+theme_set(theme_ipsum_rc())
+
+source(here::here("code/read_ready.R"))
+source(here::here("reports/autorias.R"))
+```
+
+```{r}
+proposicoes = read_proposicoes()
+detalhes_autorias = read_autorias_det()
+resumo_autorias = read_autorias_res() %>%  select(-situacao,
+                                                  -em_exercicio,
+                                                  -is_parlamentar,
+                                                  -sexo,
+                                                  -starts_with("id"))
+```
+
+## Proposições consideradas
+
+Estamos examinando `r NROW(proposicoes)` proposições dos seguintes tipos:
+
+```{r fig.height=3}
+proposicoes %>% 
+  count(sigla_tipo) %>% 
+  ggplot(aes(x = reorder(sigla_tipo, n), y = n)) + 
+  geom_chicklet(fill = "#21a6a0") + 
+  coord_flip() + 
+  labs(x = "", y = "Proposições")
+```
+
+
+```{r}
+proposicoes %>% 
+  mutate(mes = lubridate::floor_date(data_apresentacao, "months")) %>% 
+  count(mes) %>% 
+  ggplot(aes(x = mes, y = n)) + 
+  geom_chicklet(fill = "#ff8040") + 
+  scale_x_datetime(date_minor_breaks = "1 month", date_labels = "%b/%y") + 
+  labs(x = "Mês", 
+       y = "Proposições apresentadas", 
+       title = "Quando as proposições foram apresentadas")
+```
+
+## Números de autores
+
+```{r}
+participacao = detalhes_autorias %>%
+  group_by(proposicao) %>% 
+  summarise(autores = n(), 
+            partidos = n_distinct(partido))
+```
+
+```{r}
+participacao %>% 
+  ggplot(aes(x = reorder(proposicao, autores), y = autores)) + 
+  geom_hline(yintercept = 1, color = "#dddddd") + 
+  geom_chicklet(width = .5, fill = "#f7c74f") +
+  coord_flip() + 
+  labs(x = "", 
+       title = "Número de parlamentares autores",
+       subtitle = "Considerando todos que assinaram a proposição")
+```
+
+```{r}
+participacao %>% 
+  ggplot(aes(x = reorder(proposicao, partidos), y = partidos)) + 
+  geom_hline(yintercept = 1, color = "#dddddd") + 
+  geom_chicklet(width = .5, fill = "#f7c74f") +
+  coord_flip() + 
+  labs(x = "", 
+       title = "Número de partidos entre autores")
+```
+```{r}
+atividade_partido = detalhes_autorias %>% 
+  group_by(partido) %>% 
+  summarise(proposicoes = n_distinct(proposicao))
+  
+detalhes_autorias %>%
+  distinct(proposicao, partido) %>% 
+  left_join(participacao) %>% 
+  left_join(atividade_partido) %>% 
+  ggplot(aes(x = reorder(partido, -proposicoes), y = reorder(proposicao, partidos))) + 
+  geom_tile(fill =  "#f7c74f", color = "black") + 
+  labs(
+    title = "Colaborações entre partidos",
+    subtitle = "Células indicam se cada partido assinou cada prop.",
+    x = "",
+    y = ""
+  )
+```
+
