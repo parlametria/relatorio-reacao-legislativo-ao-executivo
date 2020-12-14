@@ -74,6 +74,7 @@ proposicoes %>%
 ```{r}
 participacao = detalhes_autorias %>%
   group_by(proposicao) %>% 
+  filter(!is.na(partido)) %>% 
   summarise(autores = n(), 
             partidos = n_distinct(partido))
 ```
