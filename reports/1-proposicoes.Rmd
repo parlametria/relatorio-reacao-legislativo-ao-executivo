@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
   # fig.cap = '',
   warning = FALSE,
   # fig.align = 'center',
-  fig.width = 6,
+  fig.width = 8,
   fig.height = 5
 )
 
@@ -67,6 +67,41 @@ proposicoes %>%
   labs(x = "Mês", 
        y = "Proposições apresentadas", 
        title = "Quando as proposições foram apresentadas")
+```
+
+```{r}
+proposicoes %>% 
+  count(tema) %>% 
+  ggplot(aes(x = reorder(tema, n), y = n)) + 
+  geom_chicklet(fill = "#21a6a0") + 
+  coord_flip() + 
+  labs(x = "", y = "Proposições", title = "Por tema", subtitle = "Categorização para o relatório")
+```
+
+```{r}
+proposicoes %>% 
+  count(norma_atacada) %>% 
+  top_n(10, n) %>% 
+  mutate(norma_atacada = if_else(str_length(norma_atacada) <= 50, 
+                                 norma_atacada, 
+                                 paste0(str_sub(norma_atacada, end = 47), "..."))) %>% 
+  ggplot(aes(x = reorder(norma_atacada, n), y = n)) + 
+  geom_chicklet(fill = "#ff8040") + 
+  coord_flip() + 
+  labs(x = "", y = "Proposições", title = "Por Norma Atacada", subtitle = "Norma a ser suspendida")
+```
+
+
+```{r}
+proposicoes %>% 
+  filter(!is.na(situacao)) %>% 
+  count(situacao) %>% 
+  ggplot(aes(x = reorder(situacao, n), y = n)) + 
+  geom_chicklet(fill = "#21a6a0") + 
+  coord_flip() + 
+  labs(title = "Situação das proposições", 
+       subtitle = "em dez/2020",
+       x = "", y = "Proposições")
 ```
 
 ## Números de autores
