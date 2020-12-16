@@ -98,11 +98,9 @@ Pronto! O processamento dos csvs do módulo de proposições usando o Parlametri
 
 ## Passo 2.1
 
-Baixe os repositórios [leggo-twitter-dados](https://github.com/parlametria/leggo-twitter-dados) e do [leggo-backend](https://github.com/parlametria/leggo-backend)
+Baixe o repositório [leggo-twitter-dados](https://github.com/parlametria/leggo-twitter-dados).
 
 O **leggo-twitter-dados** é responsável por empacotar as funções que capturam e processam os dados de tweets dos parlamentares que falaram sobre proposições.
-
-O **leggo-backend** é responsável por disponibilizar o Banco de dados com as proposições e a API para o acesso.
 
 ## Passo 2.2
 
@@ -116,30 +114,17 @@ Caso você não tenha o `python3.8` instalado é possível usar algum outro `pyt
 
 ## Passo 2.3
 
-Caso você ainda não tenha feito, é preciso importar os dados gerados pelo leggoR no passo 1.6 para o banco de dados do leggo-backend.
-
-Para isso execute de dentro do repositório leggo-backend:
-
-```sh
-make update
-```
+Copie o csv de proposições de entrada para o repositório do leggo-twitter-dados em `data/proposicoes_input.csv`.
 
 ## Passo 2.4
 
 Baixe o [zip](https://drive.google.com/file/d/1q0lW1vFrfEppgMG-wGmaxRhnB1JRLyVR/view) dos tweets dos parlamentares na legislatura atual para o diretório `data/tweets/` no repositório do leggo-twitter-dados;
 
-
 ## Passo 2.6
-
-
-Garanta que os containers conversam na mesma network:
-```sh
-docker network connect compose_default r-leggo-twitter
-```
 
 Execute o comando de exportação dos dados brutos
 ```sh
-make r-export-data url=http://agorapi:8000
+docker exec -it r-leggo-twitter bash -c "Rscript /leggo-twitter-dados/code/export_data.R -p data/proposicoes_input.csv"
 ```
 
 Execute o comando de normalização dos dados
