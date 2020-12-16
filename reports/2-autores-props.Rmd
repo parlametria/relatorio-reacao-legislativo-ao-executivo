@@ -44,13 +44,13 @@ resumo_autorias = read_autorias_res() %>%  select(-situacao,
                                                   -starts_with("id"))
 
 resumo_autorias = resumo_autorias %>%
-  mutate(assinou = if_else(assinadas > 0, "Autores", "Demais parlamentares"))
+  filter(assinadas > 0)
+  # mutate(assinou = if_else(assinadas > 0, "Autores", "Demais parlamentares"))
 ```
 
 
 ```{r}
 resumo_autorias %>%
-  select(-assinou) %>% 
   tbl_autorias_resumida()
 ```
 
@@ -66,29 +66,29 @@ detalhes_autorias %>%
 
 
 ```{r}
-resumo_autorias %>% 
-  filter(!is.na(governismo)) %>% 
-  ggplot(aes(y = governismo, x = assinou, size = autorias_ponderadas, color = assinou)) + 
-  facet_grid(casa ~ .) + 
-  scale_color_discrete(name = NULL) + 
-  coord_flip() + 
-  geom_quasirandom(alpha = .5) + 
-  labs(y = "Governismo (neg. sign. oposição)", 
-       x = "", 
-       title = "Governismo entre autores das PDLs", 
-       subtitle = "Cada ponto é um(a) parlamentar. Maiores autoraram mais.",
-       size = "Autorias poderadas") + 
+resumo_autorias %>%
+  filter(!is.na(governismo)) %>%
+  ggplot(aes(y = governismo, x = casa, size = autorias_ponderadas)) +
+  scale_color_discrete(name = NULL) +
+  coord_flip() +
+  geom_quasirandom(alpha = .6, color = "darkorange4") +
+  labs(
+    y = "Governismo (neg. sign. oposição)",
+    x = "",
+    title = "Governismo entre autores das PDLs",
+    subtitle = "Cada ponto é um(a) parlamentar. Maiores autoraram mais.",
+    size = "Autorias poderadas"
+  ) +
   theme(legend.position = "None")
 ```
 
 ```{r}
 resumo_autorias %>% 
   filter(!is.na(peso_politico)) %>% 
-  ggplot(aes(y = peso_politico, x = assinou, size = autorias_ponderadas, color = assinou)) + 
-  facet_grid(casa ~ .) + 
+  ggplot(aes(y = peso_politico, x = casa, size = autorias_ponderadas)) + 
   scale_color_discrete(name = NULL) + 
   coord_flip() + 
-  geom_quasirandom(alpha = .5) + 
+  geom_quasirandom(alpha = .6, color = "darkseagreen") + 
   labs(y = "Peso político no parlametria", 
        x = "", 
        title = "Peso político entre autores das PDLs", 
@@ -99,10 +99,10 @@ resumo_autorias %>%
 ```{r}
 resumo_autorias %>% 
   filter(!is.na(peso_politico + governismo)) %>% 
-  ggplot(aes(y = peso_politico, x = governismo, size = autorias_ponderadas, color = assinou)) + 
+  ggplot(aes(y = peso_politico, x = governismo, size = autorias_ponderadas)) + 
   facet_grid(casa ~ .) + 
   scale_color_discrete(name = NULL) + 
-  geom_point(alpha = .6) + 
+  geom_point(alpha = .6, color = "coral4") + 
   labs(y = "Peso político no parlametria", 
        x = "Governismo", 
        title = "Peso político entre autores das PDLs", 

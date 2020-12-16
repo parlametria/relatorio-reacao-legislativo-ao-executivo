@@ -49,11 +49,12 @@ Estamos examinando `r NROW(proposicoes)` proposições dos seguintes tipos:
 
 ```{r fig.height=3}
 proposicoes %>% 
-  count(sigla_tipo) %>% 
-  ggplot(aes(x = reorder(sigla_tipo, n), y = n)) + 
+  count(casa_origem, sigla_tipo) %>% 
+  ggplot(aes(x = reorder(casa_origem, n), y = n)) + 
   geom_chicklet(fill = "#21a6a0") + 
   coord_flip() + 
-  labs(x = "", y = "Proposições")
+  labs(x = "", y = "Proposições", 
+       title = "PDLs por casa de origem")
 ```
 
 
@@ -93,18 +94,38 @@ proposicoes %>%
 
 
 ```{r}
-proposicoes %>% 
-  filter(!is.na(situacao)) %>% 
-  separate(situacao, c("situacao", "resto"), sep = "[-.]") %>% 
-  count(situacao) %>% 
-  filter(n > 1) %>% 
-  ggplot(aes(x = reorder(situacao, n), y = n)) + 
-  geom_chicklet(fill = "#21a6a0") + 
-  coord_flip() + 
-  labs(title = "Situação das proposições", 
-       subtitle = "em dez/2020",
-       x = "", y = "Proposições")
+tramitacao = proposicoes %>%
+  filter(!is.na(situacao)) %>%
+  separate(situacao, c("situacao", "resto"), sep = "[-.]") %>%
+  mutate(situacao = if_else(casa_origem == "senado", resto, situacao)) %>%
+  mutate(situacao = str_to_sentence(situacao) %>% str_replace("de relator", "do relator") %>% str_trim()) %>%
+  mutate(situacao = if_else(str_detect(situacao, "Aguardando parecer"), "Aguardando parecer", situacao)) 
+
+tramitacao %>% 
+  count(situacao) %>%
+  mutate(destaque = situacao != "Pronta para pauta") %>% 
+  filter(n > 1) %>%
+  ggplot(aes(x = reorder(situacao, n), y = n, fill = destaque)) +
+  geom_chicklet() +
+  coord_flip() +
+  labs(
+    title = "Tramitação das proposições",
+    subtitle = "Situações mais comuns em dez/2020",
+    x = "",
+    y = "Proposições"
+  ) + 
+  theme(legend.position = "None")
 ```
+
+Proposições prontas para a pauta:
+
+```{r}
+tramitacao %>% 
+  filter(situacao == "Pronta para pauta") %>% 
+  select(`Proposição` = nome_proposicao, `Casa de Origem` = casa_origem) %>% 
+  reactable::reactable()
+```
+
 
 ## Números de autores
 
@@ -150,19 +171,22 @@ participacao %>%
        title = "Número de partidos entre autores", 
        subtitle = "Apenas proposições com mais de um partido autor")
 ```
-```{r}
+```{r fig.width=10}
 atividade_partido = detalhes_autorias %>% 
   filter(!is.na(partido)) %>% 
   group_by(partido) %>% 
   summarise(proposicoes = n_distinct(proposicao))
   
 detalhes_autorias %>%
-  filter(proposicao %in% (filter(participacao, partidos >1) %>% pull(proposicao))) %>% 
-  distinct(proposicao, partido) %>% 
-  left_join(participacao) %>% 
-  left_join(atividade_partido) %>% 
-  ggplot(aes(x = reorder(partido, -proposicoes), y = reorder(proposicao, partidos))) + 
-  geom_tile(fill =  "#f7c74f", color = "black") + 
+  filter(proposicao %in% (filter(participacao, partidos > 1) %>% pull(proposicao))) %>%
+  distinct(proposicao, partido) %>%
+  left_join(participacao) %>%
+  left_join(atividade_partido) %>%
+  ggplot(aes(
+    x = reorder(partido,-proposicoes),
+    y = reorder(proposicao, partidos)
+  )) +
+  geom_tile(fill =  "#f7c74f", color = "black") +
   labs(
     title = "Colaborações entre partidos que coautoraram",
     subtitle = "Células indicam se cada partido assinou cada prop.",
