@@ -102,7 +102,7 @@ tbl_detalhes_autorias = function(data) {
         proposicao = colDef(
           name = "Proposições",
           minWidth = 100,
-          aggregate = "unique"
+          aggregate = "count"
         ),
         assinadas = colDef(
           name = "Prop. assinadas",
