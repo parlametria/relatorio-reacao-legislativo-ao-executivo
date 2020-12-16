@@ -95,7 +95,9 @@ proposicoes %>%
 ```{r}
 proposicoes %>% 
   filter(!is.na(situacao)) %>% 
+  separate(situacao, c("situacao", "resto"), sep = "[-.]") %>% 
   count(situacao) %>% 
+  filter(n > 1) %>% 
   ggplot(aes(x = reorder(situacao, n), y = n)) + 
   geom_chicklet(fill = "#21a6a0") + 
   coord_flip() + 
