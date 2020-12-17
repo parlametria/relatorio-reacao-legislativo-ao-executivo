@@ -133,3 +133,13 @@ autorias_partidos %>%
        subtitle = "Pelo menos um(a) parlamentar do partido é autor(a)",
        x = "", y = "PDLs autordas por parlamentar do partido")
 ```
+
+
+
+```{r}
+autorias_partidos %>%
+  filter(!is.na(partido)) %>% 
+  count(partido, sort = T) %>%
+  reactable()
+```
+
