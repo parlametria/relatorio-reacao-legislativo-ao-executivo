@@ -27,6 +27,7 @@ library(tidyverse)
 library(ggbeeswarm)
 library(ggchicklet)
 library(hrbrthemes)
+library(reactable)
 theme_set(theme_ipsum_rc())
 
 source(here::here("code/read_ready.R"))
