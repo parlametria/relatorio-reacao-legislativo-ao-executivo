@@ -81,6 +81,13 @@ proposicoes %>%
 
 ```{r}
 proposicoes %>% 
+  count(tema, sort = T) %>% 
+  reactable()
+```
+
+
+```{r}
+proposicoes %>% 
   count(norma_atacada) %>% 
   top_n(10, n) %>% 
   mutate(norma_atacada = if_else(str_length(norma_atacada) <= 50, 
@@ -126,6 +133,12 @@ tramitacao %>%
   reactable::reactable()
 ```
 
+```{r}
+tramitacao %>% 
+  count(situacao, sort = T) %>%
+  reactable()
+```
+
 
 ## Números de autores
 
@@ -157,6 +170,12 @@ participacao %>%
   coord_flip() + 
   labs(x = "", 
        title = "Proposições com mais autores")
+```
+```{r}
+participacao %>% 
+  select(proposicao, autores) %>% 
+  arrange(-autores) %>% 
+  reactable()
 ```
 
 
